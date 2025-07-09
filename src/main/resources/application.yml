@@ -10,5 +10,5 @@ spring:
 
 app:
   jwt:
-    secret-key: aGVsbG8td29ybGQtdGhpcy1pcy1hLXNlY3JldC1rZXkeYQ==
-    expiration-time: 3600
+    secret-key: aGVsbG8td29ybGQtdGhpcy1pcy1hLXNlY3JldC1rZXkK
+    expiration-time: 86400000
