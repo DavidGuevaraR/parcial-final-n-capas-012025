@@ -1,9 +1,10 @@
 package com.uca.parcialfinalncapas.service;
 
+import com.uca.parcialfinalncapas.dto.request.AuthRequest;
 import com.uca.parcialfinalncapas.dto.request.UserCreateRequest;
 import com.uca.parcialfinalncapas.dto.request.UserUpdateRequest;
+import com.uca.parcialfinalncapas.dto.response.AuthResponse;
 import com.uca.parcialfinalncapas.dto.response.UserResponse;
-import com.uca.parcialfinalncapas.entities.User;
 
 import java.util.List;
 
@@ -44,5 +45,12 @@ public interface UserService {
      */
     List<UserResponse> findAll();
 
+    /**
+     * Realiza el inicio de sesión de un usuario.
+     *
+     * @param request objeto que contiene las credenciales del usuario
+     * @return un objeto AuthResponse con el token de autenticación
+     */
+    AuthResponse login(AuthRequest request);
 
 }

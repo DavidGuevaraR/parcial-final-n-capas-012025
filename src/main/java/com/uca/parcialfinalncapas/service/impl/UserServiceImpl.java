@@ -1,14 +1,18 @@
 package com.uca.parcialfinalncapas.service.impl;
 
+import com.uca.parcialfinalncapas.dto.request.AuthRequest;
 import com.uca.parcialfinalncapas.dto.request.UserCreateRequest;
 import com.uca.parcialfinalncapas.dto.request.UserUpdateRequest;
+import com.uca.parcialfinalncapas.dto.response.AuthResponse;
 import com.uca.parcialfinalncapas.dto.response.UserResponse;
-import com.uca.parcialfinalncapas.entities.User;
 import com.uca.parcialfinalncapas.exceptions.UserNotFoundException;
 import com.uca.parcialfinalncapas.repository.UserRepository;
 import com.uca.parcialfinalncapas.service.UserService;
+import com.uca.parcialfinalncapas.utils.JwtUtils;
 import com.uca.parcialfinalncapas.utils.mappers.UserMapper;
 import lombok.AllArgsConstructor;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +21,8 @@ import java.util.List;
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtils jwtUtils;
 
     @Override
     public UserResponse findByCorreo(String correo) {
@@ -30,6 +36,9 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findByCorreo(user.getCorreo()).isPresent()) {
             throw new UserNotFoundException("Ya existe un usuario con el correo: " + user.getCorreo());
         }
+
+        // Codifica el password antes de guardar
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         return UserMapper.toDTO(userRepository.save(UserMapper.toEntityCreate(user)));
     }
@@ -54,5 +63,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserResponse> findAll() {
         return UserMapper.toDTOList(userRepository.findAll());
+    }
+
+    @Override
+    public AuthResponse login(AuthRequest request) {
+        var user = userRepository.findByCorreo(request.getCorreo())
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new UserNotFoundException("Usuario y/o contraseña incorrecta");
+        }
+
+        String token = jwtUtils.generateToken(user.getCorreo());
+        return UserMapper.toLoginResponse(user, token);
     }
 }
