@@ -52,11 +52,33 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 
 ```yaml
 services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: parcialdb
+    ports:
+      - "5432:5432"
+    networks:
+      - backend-net
+
   springboot-app:
     build: .
+    container_name: springboot-backend
     ports:
       - "8080:8080"
-    container_name: springboot-backend
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/parcialdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    networks:
+      - backend-net
+
+networks:
+  backend-net:
 ```
 
 > ⚠️ *Puedes eliminar la línea `version:` si ves un warning sobre obsolescencia.*
